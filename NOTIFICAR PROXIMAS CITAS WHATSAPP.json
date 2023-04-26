@@ -1,0 +1,377 @@
+{
+    "name": "NeBot_NOTIFICAR PROXIMAS CITAS (copy)",
+    "flow": [
+        {
+            "id": 1,
+            "module": "google-calendar:searchEvents",
+            "version": 5,
+            "parameters": {
+                "__IMTCONN__": 975034
+            },
+            "mapper": {
+                "calendar": "nebot@nemeda.io",
+                "timeMin": "{{addDays(now; 1)}}",
+                "timeMax": "{{addDays(now; 2)}}",
+                "singleEvents": false,
+                "limit": "10"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 0,
+                    "y": 0
+                },
+                "restore": {
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "label": "NeBot-Calendar (nebot@nemeda.io)",
+                            "data": {
+                                "scoped": "true",
+                                "connection": "google"
+                            }
+                        }
+                    },
+                    "expect": {
+                        "calendar": {
+                            "mode": "chose",
+                            "label": "nebot@nemeda.io (Primary Calendar)"
+                        },
+                        "orderBy": {
+                            "mode": "chose",
+                            "label": "Empty"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:google",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "calendar",
+                        "type": "select",
+                        "label": "Calendar ID",
+                        "required": true
+                    },
+                    {
+                        "name": "timeMin",
+                        "type": "date",
+                        "label": "Start Date",
+                        "time": true
+                    },
+                    {
+                        "name": "timeMax",
+                        "type": "date",
+                        "label": "End Date",
+                        "time": true
+                    },
+                    {
+                        "name": "updatedMin",
+                        "type": "date",
+                        "label": "Updated from",
+                        "time": true
+                    },
+                    {
+                        "name": "singleEvents",
+                        "type": "boolean",
+                        "label": "Single Events",
+                        "required": true
+                    },
+                    {
+                        "name": "q",
+                        "type": "text",
+                        "label": "Query"
+                    },
+                    {
+                        "name": "orderBy",
+                        "type": "select",
+                        "label": "Order By",
+                        "validate": {
+                            "enum": [
+                                "startTime",
+                                "updated"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "type": "uinteger",
+                        "label": "Limit"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 13,
+            "module": "util:SetVariables",
+            "version": 1,
+            "parameters": {},
+            "mapper": {
+                "variables": [
+                    {
+                        "name": "Nombre",
+                        "value": "{{1.summary}}"
+                    },
+                    {
+                        "name": "hora",
+                        "value": "{{formatDate(addHours(1.start; 1); \"HH:mm\")}}"
+                    },
+                    {
+                        "name": "dia",
+                        "value": "{{formatDate(1.start; \"DD/MM/YYYY\")}}"
+                    },
+                    {
+                        "name": "Mobil",
+                        "value": "{{1.description}}"
+                    }
+                ],
+                "scope": "roundtrip"
+            },
+            "metadata": {
+                "designer": {
+                    "x": 300,
+                    "y": 0,
+                    "name": "DATOS RESERVA"
+                },
+                "restore": {
+                    "expect": {
+                        "variables": {
+                            "items": [
+                                null,
+                                null,
+                                null,
+                                null
+                            ]
+                        },
+                        "scope": {
+                            "label": "One cycle"
+                        }
+                    }
+                },
+                "expect": [
+                    {
+                        "name": "variables",
+                        "type": "array",
+                        "label": "Variables",
+                        "spec": [
+                            {
+                                "name": "name",
+                                "label": "Variable name",
+                                "type": "text",
+                                "required": true
+                            },
+                            {
+                                "name": "value",
+                                "label": "Variable value",
+                                "type": "any"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "scope",
+                        "type": "select",
+                        "label": "Variable lifetime",
+                        "required": true,
+                        "validate": {
+                            "enum": [
+                                "roundtrip",
+                                "execution"
+                            ]
+                        }
+                    }
+                ],
+                "interface": [
+                    {
+                        "name": "Nombre",
+                        "label": "Nombre",
+                        "type": "any"
+                    },
+                    {
+                        "name": "hora",
+                        "label": "hora",
+                        "type": "any"
+                    },
+                    {
+                        "name": "dia",
+                        "label": "dia",
+                        "type": "any"
+                    },
+                    {
+                        "name": "Mobil",
+                        "label": "Mobil",
+                        "type": "any"
+                    }
+                ]
+            }
+        },
+        {
+            "id": 21,
+            "module": "whatsapp-business-cloud:sendTemplateMessage",
+            "version": 1,
+            "parameters": {
+                "__IMTCONN__": 960178
+            },
+            "mapper": {
+                "fromId": "100899282891024",
+                "to": "{{13.Mobil}}",
+                "messageTemplate": "confirmar_asistencia_2::es",
+                "body": {
+                    "body_0": "{{13.Nombre}}",
+                    "body_1": "{{13.dia}}",
+                    "body_2": "{{13.hora}}"
+                },
+                "footer": {}
+            },
+            "metadata": {
+                "designer": {
+                    "x": 600,
+                    "y": 0,
+                    "name": "CONFIRMAR ASISTENCIA"
+                },
+                "restore": {
+                    "parameters": {
+                        "__IMTCONN__": {
+                            "label": "Nemeda - WhatsApp PROD (WhatsBot)",
+                            "data": {
+                                "scoped": "true",
+                                "connection": "whatsapp-business-cloud2"
+                            }
+                        }
+                    },
+                    "expect": {
+                        "fromId": {
+                            "mode": "chose",
+                            "label": "Nemeda Iparralde (+34 633 07 97 83)"
+                        },
+                        "messageTemplate": {
+                            "nested": [
+                                {
+                                    "name": "body",
+                                    "spec": [
+                                        {
+                                            "type": "html",
+                                            "label": "<pre>Hola {{1}}  ℹ️,\n\nTe recordamos que mañana tienes una reserva con nosotros en:\n\n🎯\noficinas de Nemeda Iparralde\n\n🙏 \nSi *NO* puedes asistir, envía la palabra *ANULAR* al WhatsApp \n\nSaludos,\n\n📆\nDia de la reserva: {{2}}\nhora de la reserva: {{3}}\n\n💁🏻‍♂️</pre>"
+                                        },
+                                        {
+                                            "name": "body_0",
+                                            "type": "text",
+                                            "label": "{{1}}",
+                                            "required": true
+                                        },
+                                        {
+                                            "name": "body_1",
+                                            "type": "text",
+                                            "label": "{{2}}",
+                                            "required": true
+                                        },
+                                        {
+                                            "name": "body_2",
+                                            "type": "text",
+                                            "label": "{{3}}",
+                                            "required": true
+                                        }
+                                    ],
+                                    "type": "collection",
+                                    "label": "Body"
+                                },
+                                {
+                                    "name": "footer",
+                                    "spec": [
+                                        {
+                                            "type": "html",
+                                            "label": "<pre>Nemeda & NeBot</pre>"
+                                        }
+                                    ],
+                                    "type": "collection",
+                                    "label": "Footer"
+                                }
+                            ],
+                            "label": "confirmar_asistencia_2 (es)"
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "__IMTCONN__",
+                        "type": "account:whatsapp-business-cloud2",
+                        "label": "Connection",
+                        "required": true
+                    }
+                ],
+                "expect": [
+                    {
+                        "name": "fromId",
+                        "type": "select",
+                        "label": "Sender ID",
+                        "required": true
+                    },
+                    {
+                        "name": "to",
+                        "type": "text",
+                        "label": "Receiver",
+                        "required": true
+                    },
+                    {
+                        "name": "messageTemplate",
+                        "type": "select",
+                        "label": "Message Template",
+                        "required": true
+                    },
+                    {
+                        "name": "body",
+                        "type": "collection",
+                        "label": "Body",
+                        "spec": [
+                            {
+                                "name": "body_0",
+                                "type": "text",
+                                "label": "{{1}}",
+                                "required": true
+                            },
+                            {
+                                "name": "body_1",
+                                "type": "text",
+                                "label": "{{2}}",
+                                "required": true
+                            },
+                            {
+                                "name": "body_2",
+                                "type": "text",
+                                "label": "{{3}}",
+                                "required": true
+                            }
+                        ]
+                    },
+                    {
+                        "name": "footer",
+                        "type": "collection",
+                        "label": "Footer",
+                        "spec": []
+                    }
+                ]
+            }
+        }
+    ],
+    "metadata": {
+        "instant": false,
+        "version": 1,
+        "scenario": {
+            "roundtrips": 1,
+            "maxErrors": 3,
+            "autoCommit": true,
+            "autoCommitTriggerLast": true,
+            "sequential": false,
+            "confidential": false,
+            "dataloss": false,
+            "dlq": false,
+            "freshVariables": false
+        },
+        "designer": {
+            "orphans": []
+        },
+        "zone": "eu1.make.com"
+    }
+}
